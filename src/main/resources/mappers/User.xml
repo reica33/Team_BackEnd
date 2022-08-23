@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.teamproject.dao.UserDao">
+
+    <select id="findById" resultType="User"
+            parameterType="String">
+        SELECT
+            ID
+             ,USERNAME
+             ,USERNICK
+             ,EMAIL
+             ,PASSWORD
+             ,ROLE
+        FROM
+            TB_USER
+        WHERE ID = #{id}
+    </select>
+
+    <select id="findByUserid" parameterType="String" resultType="User">
+        SELECT
+            ID
+             ,USERNAME
+             ,USERNICK
+             ,EMAIL
+             ,PASSWORD
+             ,ROLE
+        FROM
+            TB_USER
+        WHERE USERNAME = #{username}
+    </select>
+
+    <select id="findByUsername" parameterType="String"
+            resultType="User">
+        SELECT
+            ID
+             ,USERNAME
+             ,USERNICK
+             ,EMAIL
+             ,PASSWORD
+             ,ROLE
+        FROM
+            TB_USER
+        WHERE USERNICK = #{usernick}
+    </select>
+
+    <select id="existsByUsername" parameterType="String"
+            resultType="int">
+        SELECT
+            COUNT(USERNAME)
+        FROM
+            TB_USER
+        WHERE USERNAME = #{username}
+    </select>
+
+    <select id="existsByEmail" parameterType="String"
+            resultType="int">
+        SELECT
+            COUNT(EMAIL)
+        FROM
+            TB_USER
+        WHERE EMAIL = #{email}
+    </select>
+
+    <insert id="insertUser" parameterType="User">
+        INSERT INTO TB_USER(
+                    ID
+                   ,USERNAME
+                   ,USERNICK
+                   ,EMAIL
+                   ,PASSWORD
+                   ,ROLE
+        ) VALUES (
+                 SQ_USER.NEXTVAL
+                 ,#{username}
+                 ,#{usernick}
+                 ,#{email}
+                 ,#{password}
+                 ,#{role}
+        )
+    </insert>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.teamproject.dao.NoticeDao">
+<!--    TODO : findAll 수정 findByEmailContaining, -->
+<!--    //    전체 회원 조회 메소드-->
+<!--    List<Customer> findAll();-->
+
+    <select id="findAll"
+            parameterType="com.example.teamproject.paging.Criteria"
+            resultType="com.example.teamproject.model.Notice">
+        SELECT *
+        FROM (
+        SELECT ROWNUM R, TT.*
+        FROM (
+        SELECT *
+        FROM TB_NOTICE_EXT
+        ORDER BY INSERT_TIME DESC) TT
+        WHERE TT.DELETE_YN = 'N'
+        AND ROWNUM &lt;=(#{page}+1)*#{size}
+        )
+        WHERE R > #{page}*#{size}
+    </select>
+
+
+<!--    List<Customer> findByEmailContaining(Criteria criteria);-->
+    <select id="findByTitleContaining"
+            parameterType="com.example.teamproject.paging.Criteria"
+            resultType="com.example.teamproject.model.Notice">
+        SELECT *
+        FROM (
+        SELECT
+        ROWNUM R, TT.*
+        FROM TB_NOTICE_EXT TT
+        WHERE TT.DELETE_YN = 'N'
+        <!--        AND TITLE LIKE '%'|| #{title}||'%' 문자열 연결 , 제목 검색-->
+        AND TITLE LIKE '%'|| #{title}||'%'
+        AND ROWNUM &lt;=(#{page}+1)*#{size}
+        )
+        WHERE R > #{page}*#{size}
+    </select>
+<!--    //    제목에 다른 데이터 건수를 세는 메소드-->
+<!--    int selectTotalCount(String email);-->
+    <select id="selectTotalCount" parameterType="String" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM TB_NOTICE_EXT
+        WHERE DELETE_YN = 'N'
+          AND TITLE LIKE '%'|| #{title}||'%'
+    </select>
+<!--    //      id로 회원 조회 메소드-->
+<!--    Optional<Customer> findById(Long id);-->
+    <select id="findById" parameterType="long" resultType="com.example.teamproject.model.Notice">
+        SELECT
+            ID
+             ,TITLE
+             ,DESCRIPTION
+             ,DELETE_YN
+             ,INSERT_TIME
+             ,UPDATE_TIME
+             ,DELETE_TIME
+        FROM TB_NOTICE_EXT
+        WHERE DELETE_YN='N'
+        AND ID=#{id}
+    </select>
+<!--    //    회원 생성 메소드-->
+<!--    long insertCustomer(Customer customer);-->
+    <insert id="insertNotice" parameterType="com.example.teamproject.model.Notice">
+        INSERT INTO TB_NOTICE_EXT(
+        ID
+        ,TITLE
+        ,DESCRIPTION
+        ,INSERT_TIME
+        )VALUES (
+        SQ_NOTICE.NEXTVAL
+                , #{title}
+                , #{description}
+                ,TO_CHAR(SYSDATE, 'YYYY-MM-DD ')
+                        )
+<!-- 시퀀스로 받은 id를 vue단으로 보내줌-->
+        <selectKey keyProperty="id" resultType="long" order="AFTER">
+            SELECT SQ_NOTICE.CURRVAL FROM DUAL
+        </selectKey>
+    </insert>
+<!--    //    회원 수정 메소드-->
+<!--    long updateCustomer(Customer customer);-->
+    <update id="updateNotice" parameterType="com.example.teamproject.model.Notice">
+        UPDATE TB_NOTICE_EXT
+            SET
+            TITLE=#{title}
+            ,DESCRIPTION=#{description}
+            ,UPDATE_TIME= TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+        WHERE
+            ID=#{id}
+    </update>
+<!--    //    회원 삭제 메소드-->
+<!--    int deleteCustomer(Long id);-->
+    <update id="deleteNotice">
+        UPDATE TB_NOTICE_EXT
+        SET
+          DELETE_YN ='Y'
+          ,DELETE_TIME= TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+        WHERE
+            ID=#{id}
+    </update>
+<!--    //    전체 회원 삭제 메소드-->
+<!--    int deleteAll();-->
+    <update id="deleteAll">
+        UPDATE TB_NOTICE_EXT
+        SET
+                DELETE_YN ='Y'
+                ,DELETE_TIME= TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+    </update>
+
+</mapper>

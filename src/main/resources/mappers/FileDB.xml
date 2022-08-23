@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.teamproject.dao.FileDBDao">
+    <select id="findById" parameterType="String"
+            resultType="com.example.teamproject.model.FileDB">
+        SELECT
+            ID
+            ,NAME
+            ,TITLE
+            ,CONTENT
+            ,TYPE
+            ,DATA
+            ,DELETE_YN
+            ,INSERT_TIME
+            ,DELETE_TIME
+        FROM
+            TB_PHOTOGAL
+        WHERE ID = #{id}
+        AND DELETE_YN = 'N'
+    </select>
+
+
+    <select id="findAll" parameterType="com.example.teamproject.paging.Criteria"
+            resultType="com.example.teamproject.model.FileDB">
+        SELECT *
+        FROM
+            (
+                SELECT ROWNUM R, TT.*
+                 FROM (
+                 SELECT *
+                       FROM TB_PHOTOGAL
+                       ORDER BY INSERT_TIME DESC) TT
+                 WHERE TT.DELETE_YN = 'N'
+                   AND ROWNUM &lt;= (#{page}+1) * #{size}
+                   AND TITLE LIKE '%'|| #{title} ||'%'
+            )
+        WHERE R &gt; #{page} * #{size}
+
+    </select>
+
+
+    <select id="selectTotalCount"
+            resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            TB_PHOTOGAL
+        WHERE DELETE_YN = 'N'
+    </select>
+
+    <insert id="save" parameterType="com.example.teamproject.model.FileDB">
+        INSERT INTO TB_PHOTOGAL(
+             ID
+            ,NAME
+            ,TITLE
+            ,CONTENT
+            ,TYPE
+            ,DATA
+           ,DELETE_YN
+           ,INSERT_TIME
+        ) VALUES (
+            SQ_PHOTOGAL.NEXTVAL
+            ,#{name}
+            ,#{title}
+            ,#{content}
+            ,#{type}
+            ,#{data}
+            ,'N'
+            ,TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+        )
+        <!-- 시퀀스로 받은 id를 vue단으로 보내줌-->
+<!--        <selectKey keyProperty="id" resultType="long" order="AFTER">-->
+<!--            SELECT SQ_PHOTOGAL.CURRVAL FROM DUAL-->
+<!--        </selectKey>-->
+    </insert>
+    <update id="deleteById" parameterType="long">
+        UPDATE TB_PHOTOGAL
+        SET
+            DELETE_YN = 'Y'
+          ,DELETE_TIME = TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+        WHERE
+            ID = #{id}
+    </update>
+
+    <!--    List<Customer> findByEmailContaining(Criteria criteria);-->
+<!--    <select id="findByTitleContaining"-->
+<!--            parameterType="com.example.taegyungupload.paging.Criteria"-->
+<!--            resultType="com.example.taegyungupload.model.FileDB">-->
+<!--        SELECT *-->
+<!--        FROM (-->
+<!--        SELECT-->
+<!--        ROWNUM R, TT.*-->
+<!--        FROM TB_PHOTOGAL_EXT TT-->
+<!--        WHERE TT.DELETE_YN = 'N'-->
+<!--        &lt;!&ndash;        AND TITLE LIKE '%'|| #{title}||'%' 문자열 연결 , 제목 검색&ndash;&gt;-->
+<!--        AND TITLE LIKE '%'|| #{title}||'%'-->
+<!--        AND ROWNUM &lt;=(#{page}+1)*#{size}-->
+<!--        )-->
+<!--        WHERE R > #{page}*#{size}-->
+<!--    </select>-->
+</mapper>
